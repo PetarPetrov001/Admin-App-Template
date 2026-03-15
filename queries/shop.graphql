@@ -1,0 +1,10 @@
+query {
+  shop {
+    name
+    email
+    myshopifyDomain
+    plan {
+      displayName
+    }
+  }
+}

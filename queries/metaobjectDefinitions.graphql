@@ -1,0 +1,40 @@
+query MetaobjectDefinitions($first: Int = 50, $after: String) {
+  metaobjectDefinitions(first: $first, after: $after) {
+    nodes {
+      id
+      name
+      type
+      description
+      displayNameKey
+      metaobjectsCount
+      fieldDefinitions {
+        key
+        name
+        type {
+          name
+        }
+        required
+        description
+      }
+      capabilities {
+        publishable {
+          enabled
+        }
+        translatable {
+          enabled
+        }
+        renderable {
+          enabled
+        }
+      }
+      access {
+        admin
+        storefront
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

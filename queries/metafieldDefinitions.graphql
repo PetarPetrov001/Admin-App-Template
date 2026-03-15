@@ -1,0 +1,24 @@
+query MetafieldDefinitions($ownerType: MetafieldOwnerType!, $first: Int = 50, $after: String) {
+  metafieldDefinitions(ownerType: $ownerType, first: $first, after: $after) {
+    nodes {
+      id
+      name
+      namespace
+      key
+      type {
+        name
+      }
+      description
+      ownerType
+      pinnedPosition
+      validations {
+        name
+        value
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
