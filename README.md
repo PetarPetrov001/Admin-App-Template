@@ -46,22 +46,15 @@ npm run gql -- ./queries/shop.graphql
 
 ## First-Time Setup (installer)
 
-### 1. Create a custom app in Shopify Partners
+### 1. Create and link the app
 
-1. Go to [partners.shopify.com](https://partners.shopify.com) → Apps → Create app → Create app manually
-2. Name it (e.g., "Store Admin CLI")
-3. Copy the **Client ID** and **Client secret**
-
-### 2. Configure the app
-
-Update `shopify.app.toml`:
-- Replace `REPLACE_WITH_YOUR_CLIENT_ID` with your Client ID
-- Update `application_url` and `redirect_urls` with your tunnel URL
-
-Or run:
 ```bash
 shopify app config link
 ```
+
+When prompted, select **Create a new app** — this creates the app in the Partners dashboard and writes your Client ID into `shopify.app.toml` automatically.
+
+Copy the **Client secret** from the Partners dashboard (App → API access).
 
 ### 3. Set up environment
 
