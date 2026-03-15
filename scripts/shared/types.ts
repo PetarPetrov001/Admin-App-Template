@@ -5,7 +5,7 @@ export interface ProgressEntry {
   digest: string;
   valueHash: string;
   translatedAt: string;
-  status: "success" | "failed";
+  status: 'success' | 'failed';
   error?: string;
 }
 

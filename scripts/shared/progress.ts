@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { dirname } from "path";
-import type { ProgressFile } from "./types.js";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname } from 'path';
+
+import type { ProgressFile } from './types.js';
 
 export function progressKey(
   resourceId: string,
@@ -14,7 +15,7 @@ export function progressKey(
 
 export function loadProgress(path: string): ProgressFile {
   if (existsSync(path)) {
-    const raw = readFileSync(path, "utf-8");
+    const raw = readFileSync(path, 'utf-8');
     return JSON.parse(raw) as ProgressFile;
   }
   return { version: 1, entries: [] };
@@ -29,15 +30,9 @@ export function saveProgress(path: string, progress: ProgressFile): void {
 export function buildSuccessSet(progress: ProgressFile): Set<string> {
   const set = new Set<string>();
   for (const entry of progress.entries) {
-    if (entry.status === "success") {
+    if (entry.status === 'success') {
       set.add(
-        progressKey(
-          entry.resourceId,
-          entry.locale,
-          entry.key,
-          entry.digest,
-          entry.valueHash,
-        ),
+        progressKey(entry.resourceId, entry.locale, entry.key, entry.digest, entry.valueHash),
       );
     }
   }

@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-import type { Session } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
+
+import type { Session } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -10,13 +11,11 @@ export async function getDefaultShop(): Promise<string> {
   });
 
   if (sessions.length === 0) {
-    throw new Error(
-      "No stores found in the database. Install the app on a store first.",
-    );
+    throw new Error('No stores found in the database. Install the app on a store first.');
   }
 
   if (sessions.length > 1) {
-    const stores = sessions.map((s) => s.shop).join("\n  ");
+    const stores = sessions.map((s) => s.shop).join('\n  ');
     throw new Error(
       `Multiple stores found in the database:\n  ${stores}\n\n` +
         `Please specify which store to use with the --shop flag.\n` +

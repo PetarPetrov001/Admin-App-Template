@@ -1,7 +1,10 @@
-import { writeFileSync } from "fs";
-import { adminApi, type GraphQLResponse } from "./shopify-client.js";
-import { disconnect } from "./shopify-auth.js";
-import { sleep, isTransientError } from "./helpers.js";
+import { writeFileSync } from 'fs';
+
+import { isTransientError, sleep } from './helpers.js';
+import { disconnect } from './shopify-auth.js';
+import { adminApi } from './shopify-client.js';
+
+import type { GraphQLResponse } from './shopify-client.js';
 
 interface Connection<N> {
   nodes: N[];
@@ -141,13 +144,11 @@ async function fetchPageWithRetry<TData>(
       const result: GraphQLResponse<TData> = await adminApi(query, variables);
 
       if (result.errors) {
-        const errMsg = result.errors.map((e) => e.message).join("; ");
-        const isThrottled = errMsg.toLowerCase().includes("throttl");
+        const errMsg = result.errors.map((e) => e.message).join('; ');
+        const isThrottled = errMsg.toLowerCase().includes('throttl');
 
         if (isThrottled && attempt < maxRetries) {
-          const backoff =
-            Math.min(1000 * Math.pow(2, attempt), 30000) +
-            Math.random() * 500;
+          const backoff = Math.min(1000 * Math.pow(2, attempt), 30000) + Math.random() * 500;
           console.log(
             `${prefix} — throttled, retrying in ${Math.round(backoff)}ms (attempt ${attempt + 1}/${maxRetries})`,
           );
@@ -164,13 +165,8 @@ async function fetchPageWithRetry<TData>(
       const available = ext?.cost?.throttleStatus?.currentlyAvailable;
       let throttled = false;
 
-      if (
-        available !== undefined &&
-        available < throttleBudgetThreshold
-      ) {
-        console.log(
-          `${prefix} — throttle budget low (${available}), sleeping extra 1s`,
-        );
+      if (available !== undefined && available < throttleBudgetThreshold) {
+        console.log(`${prefix} — throttle budget low (${available}), sleeping extra 1s`);
         throttled = true;
         await sleep(1000);
       }
@@ -178,9 +174,7 @@ async function fetchPageWithRetry<TData>(
       return { data: result.data!, throttled };
     } catch (error) {
       if (isTransientError(error) && attempt < maxRetries) {
-        const backoff =
-          Math.min(1000 * Math.pow(2, attempt), 30000) +
-          Math.random() * 500;
+        const backoff = Math.min(1000 * Math.pow(2, attempt), 30000) + Math.random() * 500;
         console.log(
           `${prefix} — transient error, retrying in ${Math.round(backoff)}ms (attempt ${attempt + 1}/${maxRetries})`,
         );
@@ -290,7 +284,7 @@ export async function paginatedFetch<TData, TNode, TResult>(
         });
 
         if (result.errors) {
-          console.error("GraphQL errors:", result.errors);
+          console.error('GraphQL errors:', result.errors);
           process.exit(1);
         }
 
@@ -307,7 +301,7 @@ export async function paginatedFetch<TData, TNode, TResult>(
         `Page ${page}: fetched ${nodes.length} ${label} (${allResults.length} results from ${totalFetched} total)`,
       );
 
-      after = pageInfo.hasNextPage ? pageInfo.endCursor ?? null : null;
+      after = pageInfo.hasNextPage ? (pageInfo.endCursor ?? null) : null;
 
       if (after) {
         await sleep(wasThrottled ? 2000 : sleepMs);
@@ -316,9 +310,7 @@ export async function paginatedFetch<TData, TNode, TResult>(
 
     if (outputPath) {
       writeFileSync(outputPath, JSON.stringify(allResults, null, 2));
-      console.log(
-        `Done! Wrote ${allResults.length} results to ${outputPath.pathname}`,
-      );
+      console.log(`Done! Wrote ${allResults.length} results to ${outputPath.pathname}`);
     }
 
     return { results: allResults, totalFetched, pages: page };

@@ -1,7 +1,8 @@
-import type { AdminQueries, AdminMutations } from "@shopify/admin-api-client";
-import { getAccessToken, getDefaultShop } from "./shopify-auth.js";
+import { getAccessToken, getDefaultShop } from './shopify-auth.js';
 
-const API_VERSION = "2025-07";
+import type { AdminMutations, AdminQueries } from '@shopify/admin-api-client';
+
+const API_VERSION = '2025-07';
 
 export interface ThrottleStatus {
   maximumAvailable: number;
@@ -31,9 +32,9 @@ type Operations = StripIndexSignature<AdminQueries & AdminMutations>;
 // provides full type safety for query variables and return types.
 export async function adminApi<Q extends string & keyof Operations>(
   query: Q,
-  variables: Operations[Q]["variables"],
+  variables: Operations[Q]['variables'],
   shop?: string,
-): Promise<GraphQLResponse<Operations[Q]["return"]>>;
+): Promise<GraphQLResponse<Operations[Q]['return']>>;
 export async function adminApi<T = unknown>(
   query: string,
   variables?: Record<string, unknown>,
@@ -47,17 +48,14 @@ export async function adminApi(
   const resolvedShop = shop ?? (await getDefaultShop());
   const accessToken = await getAccessToken(resolvedShop);
 
-  const response = await fetch(
-    `https://${resolvedShop}/admin/api/${API_VERSION}/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": accessToken,
-      },
-      body: JSON.stringify({ query, variables }),
+  const response = await fetch(`https://${resolvedShop}/admin/api/${API_VERSION}/graphql.json`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': accessToken,
     },
-  );
+    body: JSON.stringify({ query, variables }),
+  });
 
   if (response.status === 401) {
     throw new Error(
@@ -67,9 +65,7 @@ export async function adminApi(
   }
 
   if (!response.ok) {
-    throw new Error(
-      `GraphQL request failed (${response.status}): ${await response.text()}`,
-    );
+    throw new Error(`GraphQL request failed (${response.status}): ${await response.text()}`);
   }
 
   return response.json() as Promise<GraphQLResponse>;

@@ -10,7 +10,7 @@
  *   npx tsx scripts/examples/getAllProducts.ts
  */
 
-import { paginatedFetch } from "../shared/paginated-fetch.js";
+import { paginatedFetch } from '../shared/paginated-fetch.js';
 
 // The #graphql tag lets codegen discover this query and generate types.
 // After running `npm run graphql-codegen`, you can import the generated
@@ -43,13 +43,13 @@ const QUERY = `#graphql
 
 await paginatedFetch<any, any, { id: string; variantSkus: string }>({
   query: QUERY,
-  label: "products",
+  label: 'products',
   sleepMs: 100,
-  outputPath: new URL("./product-variant-skus.json", import.meta.url),
+  outputPath: new URL('./product-variant-skus.json', import.meta.url),
   extractConnection: (data) => data.products,
   processNodes: (nodes) =>
     nodes.map((node: any) => ({
       id: node.id,
-      variantSkus: node.variants.nodes.find((v: any) => v.sku)?.sku ?? "",
+      variantSkus: node.variants.nodes.find((v: any) => v.sku)?.sku ?? '',
     })),
 });

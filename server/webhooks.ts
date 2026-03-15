@@ -1,6 +1,6 @@
-import { Router } from "express";
-import express from "express";
-import { shopify, prisma, DeliveryMethod } from "./shopify.js";
+import express, { Router } from 'express';
+
+import { DeliveryMethod, prisma, shopify } from './shopify.js';
 
 // NOTE: These webhooks only fire while the Express server is running.
 // Since the server is only used for the one-time OAuth install, these
@@ -10,7 +10,7 @@ shopify.webhooks.addHandlers({
   APP_UNINSTALLED: [
     {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhooks",
+      callbackUrl: '/webhooks',
       callback: async (_topic: string, shop: string) => {
         console.log(`[webhook] app/uninstalled from ${shop} — deleting session`);
         await prisma.session.deleteMany({ where: { shop } });
@@ -21,7 +21,7 @@ shopify.webhooks.addHandlers({
 
 const router = Router();
 
-router.post("/webhooks", express.text({ type: "*/*" }), async (req, res) => {
+router.post('/webhooks', express.text({ type: '*/*' }), async (req, res) => {
   try {
     await shopify.webhooks.process({
       rawBody: req.body as string,
@@ -29,9 +29,9 @@ router.post("/webhooks", express.text({ type: "*/*" }), async (req, res) => {
       rawResponse: res,
     });
   } catch (error) {
-    console.error("[webhook] Processing error:", error);
+    console.error('[webhook] Processing error:', error);
     if (!res.headersSent) {
-      res.status(500).send("Webhook processing failed");
+      res.status(500).send('Webhook processing failed');
     }
   }
 });

@@ -1,18 +1,14 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-export const sleep = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function sha256(value: string): string {
-  return createHash("sha256").update(value, "utf-8").digest("hex");
+  return createHash('sha256').update(value, 'utf-8').digest('hex');
 }
 
-export function resolvePath(
-  importMetaUrl: string,
-  relativePath: string,
-): string {
+export function resolvePath(importMetaUrl: string, relativePath: string): string {
   const scriptDir = dirname(fileURLToPath(importMetaUrl));
   const projectRoot = dirname(scriptDir);
   return `${projectRoot}/${relativePath}`;
@@ -30,14 +26,14 @@ export function isTransientError(error: unknown): boolean {
   if (error instanceof Error) {
     const msg = error.message.toLowerCase();
     return (
-      msg.includes("429") ||
-      msg.includes("503") ||
-      msg.includes("502") ||
-      msg.includes("500") ||
-      msg.includes("throttl") ||
-      msg.includes("econnreset") ||
-      msg.includes("etimedout") ||
-      msg.includes("fetch failed")
+      msg.includes('429') ||
+      msg.includes('503') ||
+      msg.includes('502') ||
+      msg.includes('500') ||
+      msg.includes('throttl') ||
+      msg.includes('econnreset') ||
+      msg.includes('etimedout') ||
+      msg.includes('fetch failed')
     );
   }
   return false;
