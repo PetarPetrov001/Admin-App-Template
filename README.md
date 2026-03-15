@@ -2,6 +2,38 @@
 
 Headless Shopify app for managing store content via the GraphQL Admin API. No frontend, no embedded app — just a CLI tool and batch scripts.
 
+## Installation
+
+Two ways to use this template depending on your needs:
+
+### Option A: Standalone repo
+
+Best for batch scripts, data migrations, or when you don't have a theme repo.
+
+Click **"Use this template"** on GitHub → create a new repository → clone it.
+
+### Option B: Inside a theme repo
+
+Best for content management alongside theme development. The `admin/` folder is invisible to Shopify's GitHub integration.
+
+```bash
+cd your-theme-repo
+
+# Recommended: degit downloads without .git history
+npx degit PetarPetrov001/admin-app-template admin
+
+# Alternative: clone and remove .git
+git clone https://github.com/PetarPetrov001/admin-app-template admin
+rm -rf admin/.git
+```
+
+Then:
+```bash
+cd admin
+npm install
+npm run setup
+```
+
 ## Quick Start (team members)
 
 If someone has already installed the app and committed `prisma/dev.sqlite`:
@@ -70,7 +102,7 @@ git add prisma/dev.sqlite
 git commit -m "Add Shopify session token"
 ```
 
-Now all team members can use the app without needing `.env`.
+> **Why commit the database?** The access token belongs to the app installation on the store, not to any individual user. Committing it means every team member can clone and immediately run queries — no one else needs `.env` or the OAuth flow. The repo should be private or team-only.
 
 ### 7. Deploy scopes
 
