@@ -1,0 +1,16 @@
+{
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "baseUrl": ".",
+    "types": ["node"]
+  }
+}

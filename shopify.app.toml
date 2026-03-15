@@ -1,0 +1,14 @@
+client_id = "REPLACE_WITH_YOUR_CLIENT_ID"
+name = "admin-app"
+application_url = "https://your-tunnel-url.ngrok-free.dev"
+embedded = false
+
+[access_scopes]
+# Edit scopes to match your needs, then run: shopify app deploy
+scopes = "read_products, write_products, read_metaobjects, write_metaobjects, read_metaobject_definitions, write_metaobject_definitions, read_content, write_content, read_online_store_pages, write_online_store_pages, read_online_store_navigation, write_online_store_navigation, read_markets, write_markets, read_translations, write_translations, read_locales, write_locales"
+
+[auth]
+redirect_urls = [ "https://your-tunnel-url.ngrok-free.dev/auth/callback" ]
+
+[webhooks]
+api_version = "2025-07"
