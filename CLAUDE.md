@@ -66,12 +66,12 @@ Shop is auto-detected from the database. If multiple stores exist, `--shop` is r
 
 CLI tools for Admin API access. No `.env` needed — shop and token come from the DB.
 - `gql.ts` — ad-hoc GraphQL queries (inline or from .graphql files)
-- `shared/shopify-auth.ts` — session lookup via Prisma, auto-detects shop from DB
-- `shared/shopify-client.ts` — raw fetch GraphQL client with typed overloads
-- `shared/paginated-fetch.ts` — generic cursor-based pagination runner with throttle-aware retry
-- `shared/helpers.ts` — utility functions (sleep, chunk, sha256, isTransientError, resolvePath)
-- `shared/progress.ts` — digest-based dedup for resume-safe batch operations
-- `shared/types.ts` — shared TypeScript interfaces (ProgressEntry, ProgressFile)
+- `lib/shopify-auth.ts` — session lookup via Prisma, auto-detects shop from DB
+- `lib/shopify-client.ts` — raw fetch GraphQL client with typed overloads
+- `lib/paginated-fetch.ts` — generic cursor-based pagination runner with throttle-aware retry
+- `lib/helpers.ts` — utility functions (sleep, chunk, sha256, isTransientError, resolvePath)
+- `lib/progress.ts` — digest-based dedup for resume-safe batch operations
+- `lib/types.ts` — shared TypeScript interfaces (ProgressEntry, ProgressFile)
 - `examples/getAllProducts.ts` — demonstrates the paginated-fetch pattern
 
 ### Server (`server/index.ts`)
@@ -90,7 +90,7 @@ SQLite session storage at `prisma/dev.sqlite`. Committed to git so all team memb
 
 Uses traditional non-expiring offline access tokens. No refresh logic needed.
 Tokens persist until the app is uninstalled, the API secret is revoked, or the store is closed.
-Scope changes via `shopify app deploy` do NOT invalidate the token — Shopify managed installation upgrades scopes in place.
+Scope changes via `shopify app deploy` update the app config on Shopify's side, but the existing token keeps its old scopes. Since this is a headless app (no embedded UI), managed installation can't trigger automatically. To pick up new scopes, re-run the OAuth flow (ngrok + Express server + auth URL) to get a fresh token, then commit the updated `prisma/dev.sqlite`.
 
 ## Key Patterns
 
@@ -134,8 +134,8 @@ Always introspect the schema for the exact input shape — Shopify's API evolves
 When writing new batch scripts:
 
 1. **Codegen first** — Add `#graphql` tagged queries in your script, run `npm run graphql-codegen`, then import the generated types
-2. **Use `paginatedFetch`** — For any "fetch all X" operation, use the pagination runner from `shared/paginated-fetch.ts`
+2. **Use `paginatedFetch`** — For any "fetch all X" operation, use the pagination runner from `lib/paginated-fetch.ts`
 3. **Use `adminApi()`** — For mutations or single queries. Shop auto-resolves from DB when not provided
-4. **Progress tracking** — For long-running batch operations, use `shared/progress.ts` to track what's been processed and enable safe resume
+4. **Progress tracking** — For long-running batch operations, use `lib/progress.ts` to track what's been processed and enable safe resume
 5. **Throttle awareness** — Set `throttleAware: true` in paginated-fetch config for large datasets that may hit rate limits
 6. **Always disconnect** — Use `disconnect()` in finally blocks, or `autoDisconnect: true` (default) in paginated-fetch

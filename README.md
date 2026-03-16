@@ -165,7 +165,7 @@ Claude will validate the query against the Shopify API schema, show you the muta
 ├── queries/               ← Reusable .graphql files
 ├── scripts/
 │   ├── gql.ts             ← CLI entry point
-│   ├── shared/            ← Reusable utilities
+│   ├── lib/               ← Reusable utilities
 │   └── examples/          ← Example batch scripts
 ├── server/                ← Express OAuth server (install only)
 ├── types/                 ← Codegen output (gitignored)

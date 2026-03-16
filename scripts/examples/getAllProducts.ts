@@ -10,7 +10,7 @@
  *   npx tsx scripts/examples/getAllProducts.ts
  */
 
-import { paginatedFetch } from '../shared/paginated-fetch.js';
+import { paginatedFetch } from '../lib/paginated-fetch.js';
 
 // The #graphql tag lets codegen discover this query and generate types.
 // After running `npm run graphql-codegen`, you can import the generated

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 
-import { disconnect, getDefaultShop, listStores } from './shared/shopify-auth.js';
-import { adminApi } from './shared/shopify-client.js';
+import { disconnect, getDefaultShop, listStores } from './lib/shopify-auth.js';
+import { adminApi } from './lib/shopify-client.js';
 
 const args = process.argv.slice(2);
 
