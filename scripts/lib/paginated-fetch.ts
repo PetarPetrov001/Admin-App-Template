@@ -4,7 +4,7 @@ import { isTransientError, sleep } from './helpers.js';
 import { disconnect } from './shopify-auth.js';
 import { adminApi } from './shopify-client.js';
 
-import type { GraphQLResponse } from './shopify-client.js';
+import type { ClientResponse } from './shopify-client.js';
 
 interface Connection<N> {
   nodes: N[];
@@ -141,10 +141,10 @@ async function fetchPageWithRetry<TData>(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const result: GraphQLResponse<TData> = await adminApi(query, variables);
+      const result: ClientResponse<TData> = await adminApi(query, variables);
 
       if (result.errors) {
-        const errMsg = result.errors.map((e) => e.message).join('; ');
+        const errMsg = result.errors.message ?? 'Unknown GraphQL error';
         const isThrottled = errMsg.toLowerCase().includes('throttl');
 
         if (isThrottled && attempt < maxRetries) {
@@ -277,14 +277,14 @@ export async function paginatedFetch<TData, TNode, TResult>(
         data = fetched.data;
         wasThrottled = fetched.throttled;
       } else {
-        const result: GraphQLResponse<TData> = await adminApi(query, {
+        const result: ClientResponse<TData> = await adminApi(query, {
           ...variables,
           first: pageSize,
           after,
         });
 
         if (result.errors) {
-          console.error('GraphQL errors:', result.errors);
+          console.error('GraphQL errors:', result.errors.graphQLErrors ?? result.errors.message);
           process.exit(1);
         }
 
