@@ -42,13 +42,13 @@ Only one person per project needs to run this flow. Once complete, the access to
 
 See the [Setup Flow](https://www.notion.so/324516a2828b8137bedfdea7fc4f1d1e) in the docs for the full step-by-step guide. The short version:
 
-1. `shopify app config link` — create a new app (let it generate a new toml file; `shopify.app.example.toml` is kept as a reference)
-2. Start your tunnel and configure the new toml using the example as a reference
-3. `shopify app deploy` — registers URLs and scopes with Shopify
-4. Set app distribution in the Partners dashboard
-5. Set up `.env` with your Client ID, Client secret, and tunnel URL
+1. Start your HTTPS tunnel (ngrok, Cloudflare Tunnel, etc.)
+2. `shopify app config link` — create a new app (let it generate a new toml; `shopify.app.example.toml` is kept as reference)
+3. Configure the new toml using the example — set tunnel URL, `embedded = false`, scopes
+4. Set up `.env` with your Client ID, Client secret, and tunnel URL
+5. `shopify app deploy` — registers URLs and scopes with Shopify
 6. `npm run dev` — start the Express server
-7. Visit `https://<tunnel-url>/auth?shop=YOUR_STORE.myshopify.com` to complete OAuth
+7. In Partners dashboard → Distribution → Custom distribution → generate install link → open it and follow the prompts
 8. Commit `prisma/dev.sqlite` — the token is now available to the whole team
 
 ## Usage

@@ -19,9 +19,18 @@ app.get('/', (req, res) => {
 });
 
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  if (appUrl) {
-    console.log(`Auth URL: ${appUrl}/auth?shop=YOUR_STORE.myshopify.com`);
+app.listen(PORT, async () => {
+  console.log(`Server listening on port ${PORT}`);
+
+  // Check if any sessions exist to show relevant guidance
+  const { prisma } = await import('./shopify.js');
+  const sessionCount = await prisma.session.count();
+
+  if (sessionCount === 0) {
+    console.log(
+      '\nNo installations found. Install the app via the install link from your app\'s Distribution page in the Partners dashboard.',
+    );
+  } else {
+    console.log(`\nApp already installed on ${sessionCount} store(s).`);
   }
 });
