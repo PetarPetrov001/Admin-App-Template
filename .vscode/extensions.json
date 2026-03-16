@@ -2,6 +2,7 @@
   "recommendations": [
     "esbenp.prettier-vscode",
     "Prisma.prisma",
-    "GraphQL.vscode-graphql-syntax"
+    "GraphQL.vscode-graphql-syntax",
+    "tamasfe.even-better-toml"
   ]
 }

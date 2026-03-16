@@ -106,10 +106,22 @@ This template includes a slash command for AI-assisted content management:
 
 Claude will validate the query against the Shopify API schema, show you the mutation, and execute it after confirmation.
 
+## Editor Setup
+
+The project includes a `.vscode/` folder with workspace settings (format on save via Prettier) and recommended extensions:
+
+- **Prettier** — code formatting
+- **Prisma** — syntax highlighting for `.prisma` files
+- **GraphQL Syntax** — syntax highlighting for `#graphql` tagged templates
+- **Even Better TOML** — syntax highlighting for `.toml` files
+
+VS Code will prompt you to install these when you open the project. Other VS Code-based editors (like Cursor) respect the workspace settings but may not auto-prompt for extensions — install them manually from the list above.
+
 ## Project Structure
 
 ```
 ├── .claude/commands/      ← Claude Code slash commands
+├── .vscode/               ← Editor settings + recommended extensions
 ├── prisma/                ← SQLite database + migrations
 ├── queries/               ← Reusable .graphql files
 ├── scripts/
@@ -119,6 +131,6 @@ Claude will validate the query against the Shopify API schema, show you the muta
 ├── server/                ← Express OAuth server (install only)
 ├── types/                 ← Codegen output (gitignored)
 ├── .graphqlrc.ts          ← Codegen configuration
-├── shopify.app.toml       ← Shopify app configuration
+├── shopify.app.example.toml ← Reference for app configuration
 └── shopify.web.toml       ← Shopify web configuration
 ```
