@@ -1,7 +1,0 @@
-name = "express"
-roles = ["frontend", "backend"]
-webhooks_path = "/webhooks"
-
-[commands]
-predev = "npx prisma generate && npx prisma migrate deploy"
-dev = "npx tsx server/index.ts"

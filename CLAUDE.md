@@ -49,14 +49,14 @@ Run from the app directory:
 | DB setup | `npm run setup` |
 | Generate API types | `npm run graphql-codegen` |
 
-Shop is auto-detected from the database. If multiple stores exist, `--shop` is required.
+Shop is auto-detected from the database. Custom apps are typically installed on a single store, but you might also install on a dev store for testing. If multiple stores exist, `--shop` is required.
 
 ### Install-only commands (need `.env`)
 
 | Task | Command |
 |------|---------|
-| Link/create Shopify app | `shopify app config link` |
-| Start ngrok tunnel | `ngrok http 3000` |
+| Link/create Shopify app | `shopify app config link` (creates a new toml; see `shopify.app.example.toml` for reference) |
+| Start HTTPS tunnel | `ngrok http 3000` (or any tunneling tool) |
 | Start Express server | `npm run dev` |
 | Deploy config to Shopify | `shopify app deploy` |
 
@@ -67,7 +67,7 @@ Shop is auto-detected from the database. If multiple stores exist, `--shop` is r
 CLI tools for Admin API access. No `.env` needed — shop and token come from the DB.
 - `gql.ts` — ad-hoc GraphQL queries (inline or from .graphql files)
 - `lib/shopify-auth.ts` — session lookup via Prisma, auto-detects shop from DB
-- `lib/shopify-client.ts` — raw fetch GraphQL client with typed overloads
+- `lib/shopify-client.ts` — typed GraphQL client via `@shopify/admin-api-client` with codegen-compatible overloads
 - `lib/paginated-fetch.ts` — generic cursor-based pagination runner with throttle-aware retry
 - `lib/helpers.ts` — utility functions (sleep, chunk, sha256, isTransientError, resolvePath)
 - `lib/progress.ts` — digest-based dedup for resume-safe batch operations
