@@ -2,7 +2,7 @@
 
 Headless Shopify app for managing store content via the GraphQL Admin API. No frontend, no embedded app — just a CLI tool and batch scripts.
 
-> **📖 Full documentation:** [Admin App Template on Notion](https://www.notion.so/324516a2828b81a4b477f5d974cb76d5)
+> **📖 Full documentation:** [Admin App Template on Notion](https://subsequent-fernleaf-bb9.notion.site/Admin-App-Template-324516a2828b81a4b477f5d974cb76d5)
 
 ## Installation
 
@@ -18,6 +18,7 @@ npx degit PetarPetrov001/admin-app-template admin
 ```
 
 Then:
+
 ```bash
 cd admin
 npm install
