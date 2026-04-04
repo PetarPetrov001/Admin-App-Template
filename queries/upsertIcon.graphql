@@ -1,0 +1,10 @@
+mutation UpsertIcon($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
+  metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
+    metaobject {
+      id
+      handle
+      svg_content: field(key: "svg_content") { value }
+    }
+    userErrors { field message code }
+  }
+}

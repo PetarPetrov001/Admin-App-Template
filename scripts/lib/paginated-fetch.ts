@@ -5,6 +5,7 @@ import { disconnect } from './shopify-auth.js';
 import { adminApi } from './shopify-client.js';
 
 import type { ClientResponse } from './shopify-client.js';
+import type { CostExtensions } from './types.js';
 
 interface Connection<N> {
   nodes: N[];
@@ -159,10 +160,8 @@ async function fetchPageWithRetry<TData>(
         throw new Error(`GraphQL errors on ${prefix}: ${errMsg}`);
       }
 
-      const ext = result.extensions as
-        | { cost?: { throttleStatus?: { currentlyAvailable?: number } } }
-        | undefined;
-      const available = ext?.cost?.throttleStatus?.currentlyAvailable;
+      const ext = result.extensions as { cost?: CostExtensions } | undefined;
+      const available = ext?.cost?.throttleStatus.currentlyAvailable;
       let throttled = false;
 
       if (available !== undefined && available < throttleBudgetThreshold) {

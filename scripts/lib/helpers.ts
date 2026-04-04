@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import { dirname } from 'path';
+import { createInterface } from 'readline';
 import { fileURLToPath } from 'url';
 
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -37,4 +38,14 @@ export function isTransientError(error: unknown): boolean {
     );
   }
   return false;
+}
+
+export function prompt(question: string): Promise<string> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    });
+  });
 }

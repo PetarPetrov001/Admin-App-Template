@@ -3,6 +3,7 @@
     "esbenp.prettier-vscode",
     "Prisma.prisma",
     "GraphQL.vscode-graphql-syntax",
+    "graphql.vscode-graphql",
     "tamasfe.even-better-toml"
   ]
 }

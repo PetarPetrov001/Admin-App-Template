@@ -6,9 +6,12 @@
     "node": ">=20"
   },
   "scripts": {
+    "init": "tsx scripts/setup-preset.ts",
     "dev": "tsx --env-file=.env server/index.ts",
     "gql": "tsx scripts/gql.ts",
     "setup": "prisma generate && prisma migrate deploy",
+    "configure-toml": "tsx --env-file=.env server/configure-toml.ts",
+    "link-app": "shopify app config link && tsx --env-file=.env server/configure-toml.ts",
     "graphql-codegen": "graphql-codegen"
   },
   "dependencies": {

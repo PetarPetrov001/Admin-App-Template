@@ -32,7 +32,7 @@ Shopify's GitHub integration ignores folders that don't match the theme structur
 
 ### Setup for team members
 
-- **Installer (once):** needs `.env` with API credentials, starts ngrok + Express server, visits auth URL to complete OAuth
+- **Installer (once):** needs `.env` with API credentials, runs `npm run link-app` to create and configure the Shopify app, starts ngrok + Express server, visits auth URL to complete OAuth
 - **Everyone else:** clone, `cd admin && npm install && npm run setup` — done. Token is already in the DB.
 
 ## Commands
@@ -55,7 +55,8 @@ Shop is auto-detected from the database. Custom apps are typically installed on 
 
 | Task | Command |
 |------|---------|
-| Link/create Shopify app | `shopify app config link` (creates a new toml; see `shopify.app.example.toml` for reference) |
+| Link + configure app (one step) | `npm run link-app` — runs `shopify app config link` then auto-configures the TOML |
+| Configure TOML only | `npm run configure-toml` — patches an existing TOML with `.env` values |
 | Start HTTPS tunnel | `ngrok http 3000` (or any tunneling tool) |
 | Start Express server | `npm run dev` |
 | Deploy config to Shopify | `shopify app deploy` |
@@ -90,7 +91,7 @@ SQLite session storage at `prisma/dev.sqlite`. Committed to git so all team memb
 
 Uses traditional non-expiring offline access tokens. No refresh logic needed.
 Tokens persist until the app is uninstalled, the API secret is revoked, or the store is closed.
-Scope changes via `shopify app deploy` update the app config on Shopify's side, but the existing token keeps its old scopes. Since this is a headless app (no embedded UI), managed installation can't trigger automatically. To pick up new scopes, re-run the OAuth flow (ngrok + Express server + auth URL) to get a fresh token, then commit the updated `prisma/dev.sqlite`.
+Scope changes via `shopify app deploy` update the app config on Shopify's side, but the existing token keeps its old scopes. To pick up new scopes, start the server and tunnel, open the app from the Shopify admin, and click the re-authorize link on the page that appears. This completes a fresh OAuth flow and replaces the token. Commit the updated `prisma/dev.sqlite` so the rest of the team gets it.
 
 ## Key Patterns
 
@@ -104,19 +105,11 @@ Scope changes via `shopify app deploy` update the app config on Shopify's side, 
 This app is primarily used to manage Shopify store content via the GraphQL Admin API.
 Common tasks include creating/updating metafields, metaobject definitions, reading resource data, etc.
 
-### Rules (MUST follow for every GraphQL task)
+### Safety Protocol
 
-1. **Validate first** — Before composing any query or mutation, use the `shopify-dev-mcp` tools
-   (`introspect_graphql_schema`, `search_docs_chunks`, `learn_shopify_api`) to verify field names,
-   input types, and correct API version syntax. Do NOT guess or rely on memory.
-2. **Show before running** — Always display the full GraphQL query/mutation and variables to
-   the user and wait for explicit confirmation before executing.
-3. **Execute via `npm run gql`** — Run all queries/mutations through:
-   `npm run gql -- '<query>' '<variables_json>'`
-   For multi-line or complex queries, write a `.graphql` file in `queries/` and run:
-   `npm run gql -- ./queries/<name>.graphql '<variables_json>'`
-4. **Verify the result** — After execution, inspect the response for `userErrors` or
-   GraphQL `errors` and report clearly.
+All Admin API query/mutation execution is governed by the **Shopify Admin API Safety Protocol** in `.claude/rules/shopify-content-guard.md`. This rule is always active — it applies regardless of whether `/store-content` was invoked or content work is part of a larger task (e.g., building frontend components alongside content updates).
+
+The protocol requires: schema validation via `shopify-dev-mcp` tools → full query display → explicit user confirmation via `AskUserQuestion` → execution via `npm run gql` only → error checking. See the rule file for the full specification.
 
 ### Common Task Patterns
 
