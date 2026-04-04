@@ -56,16 +56,15 @@ const PRESETS: Record<string, Preset> = {
     label: 'Custom Scripts',
     description:
       'Batch operations, migrations, paginated fetches with progress tracking.\n' +
-      '  Removes: gql CLI tool, reusable query files, Claude content-management commands.',
+      '  Removes: reusable query files, Claude content-management commands.',
     removeFiles: [
-      'scripts/gql.ts',
       '.claude/commands/store-content.md',
       '.claude/commands/add-icon.md',
     ],
     removeDirs: ['queries'],
     removeDeps: [],
     removeDevDeps: [],
-    removeScripts: ['gql'],
+    removeScripts: [],
   },
 
   full: {
