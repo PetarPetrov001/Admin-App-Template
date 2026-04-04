@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Run setup for ${{ matrix.preset }} preset
-        run: npm run init -- ${{ matrix.preset }} --yes
+        run: npm run init -- ${{ matrix.preset }} --ci
 
       # The setup script deletes itself and updates package.json.
       # Commit the pruned result to the preset branch.

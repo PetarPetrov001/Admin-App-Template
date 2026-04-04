@@ -9,7 +9,8 @@
  *   npm run init -- full      # keep everything
  *
  * Flags:
- *   --yes, -y                 # skip confirmation (for CI)
+ *   --yes, -y                 # skip confirmation
+ *   --ci                      # skip confirmation + skip prisma (lockfile update only)
  */
 
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
@@ -178,9 +179,10 @@ function preflight(): void {
 
 // ── Parse CLI args ──────────────────────────────────────────────────
 
-function parseArgs(): { preset?: string; yes: boolean } {
+function parseArgs(): { preset?: string; yes: boolean; ciOnly: boolean } {
   const args = process.argv.slice(2);
   const yes = args.includes('--yes') || args.includes('-y');
+  const ciOnly = args.includes('--ci');
   const positional = args.filter((a) => !a.startsWith('-'));
   const preset = positional[0]?.toLowerCase();
 
@@ -189,7 +191,7 @@ function parseArgs(): { preset?: string; yes: boolean } {
     process.exit(1);
   }
 
-  return { preset, yes };
+  return { preset, yes: yes || ciOnly, ciOnly };
 }
 
 // ── Main ────────────────────────────────────────────────────────────
@@ -197,7 +199,7 @@ function parseArgs(): { preset?: string; yes: boolean } {
 async function main() {
   preflight();
 
-  const { preset: argPreset, yes } = parseArgs();
+  const { preset: argPreset, yes, ciOnly } = parseArgs();
   const presetKey = argPreset ?? (await pickPreset());
   const preset = PRESETS[presetKey];
 
@@ -227,10 +229,14 @@ async function main() {
   }
 
   log('');
-  logHeader('After pruning, these commands will run automatically:');
-  log('  npm install');
-  log('  npx prisma generate');
-  log('  npx prisma migrate deploy');
+  if (ciOnly) {
+    logHeader('After pruning: npm install (lockfile update only — CI mode).');
+  } else {
+    logHeader('After pruning, these commands will run automatically:');
+    log('  npm install');
+    log('  npx prisma generate');
+    log('  npx prisma migrate deploy');
+  }
 
   if (!yes) {
     console.log();
@@ -336,22 +342,26 @@ async function main() {
     process.exit(1);
   }
 
-  logHeader('Running prisma generate...\n');
-  try {
-    execSync('npx prisma generate', { cwd: ROOT, stdio: 'inherit' });
-  } catch {
-    console.error('\nprisma generate failed. Fix the issue and run manually:');
-    console.error('  npx prisma generate && npx prisma migrate deploy');
-    process.exit(1);
-  }
+  // In CI mode we only need the lockfile update — skip prisma entirely.
+  // Users run `npm run setup` after cloning the preset branch.
+  if (!ciOnly) {
+    logHeader('Running prisma generate...\n');
+    try {
+      execSync('npx prisma generate', { cwd: ROOT, stdio: 'inherit' });
+    } catch {
+      console.error('\nprisma generate failed. Fix the issue and run manually:');
+      console.error('  npx prisma generate && npx prisma migrate deploy');
+      process.exit(1);
+    }
 
-  logHeader('Running prisma migrate deploy...\n');
-  try {
-    execSync('npx prisma migrate deploy', { cwd: ROOT, stdio: 'inherit' });
-  } catch {
-    console.error('\nprisma migrate deploy failed. Fix the issue and run manually:');
-    console.error('  npx prisma migrate deploy');
-    process.exit(1);
+    logHeader('Running prisma migrate deploy...\n');
+    try {
+      execSync('npx prisma migrate deploy', { cwd: ROOT, stdio: 'inherit' });
+    } catch {
+      console.error('\nprisma migrate deploy failed. Fix the issue and run manually:');
+      console.error('  npx prisma migrate deploy');
+      process.exit(1);
+    }
   }
 
   // ── Done ───────────────────────────────────────────────────────
