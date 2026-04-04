@@ -1,0 +1,54 @@
+name: Build preset branches
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - '.vscode/**'
+
+# Only one build at a time — newer pushes cancel in-progress runs.
+concurrency:
+  group: build-presets
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        preset: [content, scripts]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run setup for ${{ matrix.preset }} preset
+        run: npm run init -- ${{ matrix.preset }} --yes
+
+      # The setup script deletes itself and updates package.json.
+      # Commit the pruned result to the preset branch.
+      - name: Push to preset/${{ matrix.preset }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Remove node_modules and lockfile from the commit
+          # (users run npm install themselves after cloning)
+          git rm -r --cached node_modules 2>/dev/null || true
+
+          # Stage all changes (deletions + package.json update)
+          git add -A
+
+          COMMIT_MSG="Build preset/${{ matrix.preset }} from $(git rev-parse --short HEAD)"
+          git commit -m "$COMMIT_MSG" --allow-empty
+
+          # Force-push to the preset branch (it's a generated branch, not user-edited)
+          git push origin HEAD:refs/heads/preset/${{ matrix.preset }} --force

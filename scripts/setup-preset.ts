@@ -7,6 +7,9 @@
  *   npm run init -- content   # content management only
  *   npm run init -- scripts   # migration/batch scripts only
  *   npm run init -- full      # keep everything
+ *
+ * Flags:
+ *   --yes, -y                 # skip confirmation (for CI)
  */
 
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
@@ -22,19 +25,17 @@ const ROOT = resolve(dirname(SCRIPT_PATH), '..');
 const PKG_PATH = join(ROOT, 'package.json');
 
 // ── Preset definitions ──────────────────────────────────────────────
+//
+// removeFiles — individual files (config, entry points, commands)
+// removeDirs  — entire directories (drop a new file in and it's auto-handled)
 
 interface Preset {
   label: string;
   description: string;
-  /** Files to delete (relative to project root). Missing files are silently skipped. */
   removeFiles: string[];
-  /** Directories to delete recursively (relative to project root). */
   removeDirs: string[];
-  /** Production dependencies to remove from package.json. */
   removeDeps: string[];
-  /** Dev dependencies to remove from package.json. */
   removeDevDeps: string[];
-  /** npm script entries to remove from package.json. */
   removeScripts: string[];
 }
 
@@ -43,15 +44,9 @@ const PRESETS: Record<string, Preset> = {
     label: 'Content Management',
     description:
       'Ad-hoc GraphQL via CLI + Claude-assisted content management.\n' +
-      '  Removes: pagination runner, progress tracking, batch utilities, codegen config.',
-    removeFiles: [
-      'scripts/lib/paginated-fetch.ts',
-      'scripts/lib/progress.ts',
-      'scripts/lib/types.ts',
-      'scripts/lib/helpers.ts',
-      '.graphqlrc.ts',
-    ],
-    removeDirs: ['scripts/examples', 'types'],
+      '  Removes: pagination runner, progress tracking, batch utilities, codegen.',
+    removeFiles: ['.graphqlrc.ts'],
+    removeDirs: ['scripts/lib/migration', 'scripts/examples', 'types'],
     removeDeps: [],
     removeDevDeps: ['@shopify/api-codegen-preset'],
     removeScripts: ['graphql-codegen'],
@@ -85,6 +80,7 @@ const PRESETS: Record<string, Preset> = {
 };
 
 const SELF_SCRIPT_KEY = 'init';
+const VALID_PRESETS = Object.keys(PRESETS);
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -109,7 +105,6 @@ function logHeader(msg: string) {
 function removePath(relativePath: string, kind: 'file' | 'dir'): boolean {
   const abs = join(ROOT, relativePath);
   if (!existsSync(abs)) return false;
-
   rmSync(abs, { recursive: kind === 'dir', force: true });
   return true;
 }
@@ -136,9 +131,8 @@ function writePkg(pkg: Record<string, any>) {
 
 async function pickPreset(): Promise<string> {
   logHeader('Available presets:\n');
-  const keys = Object.keys(PRESETS);
 
-  keys.forEach((key, i) => {
+  VALID_PRESETS.forEach((key, i) => {
     const p = PRESETS[key];
     console.log(`  [${i + 1}] ${p.label}`);
     console.log(`      ${p.description.split('\n').join('\n      ')}`);
@@ -147,38 +141,33 @@ async function pickPreset(): Promise<string> {
 
   const answer = await ask('Select a preset (number or name): ');
 
-  // Accept by number
   const num = parseInt(answer, 10);
-  if (num >= 1 && num <= keys.length) return keys[num - 1];
+  if (num >= 1 && num <= VALID_PRESETS.length) return VALID_PRESETS[num - 1];
 
-  // Accept by name
   const normalized = answer.toLowerCase();
   if (PRESETS[normalized]) return normalized;
 
-  console.error(`\nUnknown preset: "${answer}". Expected: ${keys.join(', ')}`);
+  console.error(`\nUnknown preset: "${answer}". Expected: ${VALID_PRESETS.join(', ')}`);
   process.exit(1);
 }
 
 // ── Preflight checks ────────────────────────────────────────────────
 
 function preflight(): void {
-  // Check we're in the right directory
   if (!existsSync(PKG_PATH)) {
     console.error('Error: package.json not found. Run this from the project root.');
     process.exit(1);
   }
 
-  // Check setup hasn't already been run
   const pkg = readPkg();
   if (!pkg.scripts?.[SELF_SCRIPT_KEY]) {
     console.error(
       'Error: Setup has already been run (no "init" script in package.json).\n' +
-        'If you need to re-run setup, restore the template files first.',
+        'If you need to re-run, restore the template files first.',
     );
     process.exit(1);
   }
 
-  // Check node_modules exist (npm install must run first)
   if (!existsSync(join(ROOT, 'node_modules'))) {
     console.error(
       'Error: node_modules not found. Run "npm install" before running setup.\n' +
@@ -188,23 +177,32 @@ function preflight(): void {
   }
 }
 
+// ── Parse CLI args ──────────────────────────────────────────────────
+
+function parseArgs(): { preset?: string; yes: boolean } {
+  const args = process.argv.slice(2);
+  const yes = args.includes('--yes') || args.includes('-y');
+  const positional = args.filter((a) => !a.startsWith('-'));
+  const preset = positional[0]?.toLowerCase();
+
+  if (preset && !PRESETS[preset]) {
+    console.error(`Unknown preset: "${preset}". Expected: ${VALID_PRESETS.join(', ')}`);
+    process.exit(1);
+  }
+
+  return { preset, yes };
+}
+
 // ── Main ────────────────────────────────────────────────────────────
 
 async function main() {
   preflight();
 
-  // Resolve preset from args or interactive picker
-  const arg = process.argv[2]?.toLowerCase();
-
-  if (arg && arg !== 'content' && arg !== 'scripts' && arg !== 'full') {
-    console.error(`Unknown preset: "${arg}". Expected: content, scripts, full`);
-    process.exit(1);
-  }
-
-  const presetKey = arg ?? (await pickPreset());
+  const { preset: argPreset, yes } = parseArgs();
+  const presetKey = argPreset ?? (await pickPreset());
   const preset = PRESETS[presetKey];
 
-  // ── Summarize what will happen ──────────────────────────────────
+  // ── Summarize ──────────────────────────────────────────────────
 
   logHeader(`Preset: ${preset.label}`);
 
@@ -235,11 +233,15 @@ async function main() {
   log('  npx prisma generate');
   log('  npx prisma migrate deploy');
 
-  console.log();
-  const confirm = await ask('Proceed? (y/N): ');
-  if (confirm.toLowerCase() !== 'y') {
-    console.log('Aborted.');
-    process.exit(0);
+  if (!yes) {
+    console.log();
+    const confirm = await ask('Proceed? (y/N): ');
+    if (confirm.toLowerCase() !== 'y') {
+      console.log('Aborted.');
+      process.exit(0);
+    }
+  } else {
+    console.log('\n  --yes flag set, skipping confirmation.\n');
   }
 
   // ── Remove files and directories ───────────────────────────────
@@ -271,6 +273,10 @@ async function main() {
     const parent = dirname(file);
     if (parent !== '.') parentDirs.add(parent);
   }
+  for (const dir of preset.removeDirs) {
+    const parent = dirname(dir);
+    if (parent !== '.') parentDirs.add(parent);
+  }
   for (const dir of parentDirs) {
     if (isDirEmpty(dir)) {
       removePath(dir, 'dir');
@@ -287,7 +293,6 @@ async function main() {
   logHeader('Updating package.json...');
   const pkg = readPkg();
 
-  // Remove deps
   for (const dep of preset.removeDeps) {
     if (pkg.dependencies?.[dep]) {
       delete pkg.dependencies[dep];
@@ -301,7 +306,6 @@ async function main() {
     }
   }
 
-  // Remove scripts
   for (const script of preset.removeScripts) {
     if (pkg.scripts?.[script]) {
       delete pkg.scripts[script];
@@ -309,7 +313,6 @@ async function main() {
     }
   }
 
-  // Remove self
   if (pkg.scripts?.[SELF_SCRIPT_KEY]) {
     delete pkg.scripts[SELF_SCRIPT_KEY];
     log(`Removed script: ${SELF_SCRIPT_KEY}`);

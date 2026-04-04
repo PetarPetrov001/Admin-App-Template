@@ -1,10 +1,10 @@
 import { writeFileSync } from 'fs';
 
 import { isTransientError, sleep } from './helpers.js';
-import { disconnect } from './shopify-auth.js';
-import { adminApi } from './shopify-client.js';
+import { disconnect } from '../shopify-auth.js';
+import { adminApi } from '../shopify-client.js';
 
-import type { ClientResponse } from './shopify-client.js';
+import type { ClientResponse } from '../shopify-client.js';
 import type { CostExtensions } from './types.js';
 
 interface Connection<N> {
