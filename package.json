@@ -6,7 +6,6 @@
     "node": ">=20"
   },
   "scripts": {
-    "init": "tsx scripts/setup-preset.ts",
     "dev": "tsx --env-file=.env server/index.ts",
     "gql": "tsx scripts/gql.ts",
     "setup": "prisma generate && prisma migrate deploy",

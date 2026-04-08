@@ -1,8 +1,0 @@
-mutation PublishMetaobject($id: ID!) {
-  metaobjectUpdate(id: $id, metaobject: { capabilities: { publishable: { status: ACTIVE } } }) {
-    metaobject {
-      handle
-    }
-    userErrors { field message code }
-  }
-}
