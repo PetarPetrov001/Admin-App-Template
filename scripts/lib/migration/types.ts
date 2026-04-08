@@ -10,10 +10,24 @@ export interface CostExtensions {
   throttleStatus: ThrottleStatus;
 }
 
+export interface MutationResult<T> {
+  node: T;
+  status: 'success' | 'failed';
+  error?: string;
+  throttle?: ThrottleStatus;
+  cost?: number;
+}
+
 /** Base constraint for any progress entry — must have a status field. */
 export interface ProgressEntryBase {
   status: 'success' | 'failed';
   error?: string;
+}
+
+/** Simple progress entry for batch mutations — keyed by a single ID. */
+export interface BatchProgressEntry extends ProgressEntryBase {
+  id: string;
+  processedAt: string;
 }
 
 /** Generic progress file. The entry type is determined by the caller. */
